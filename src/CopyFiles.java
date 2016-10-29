@@ -150,6 +150,7 @@ public class CopyFiles extends Thread {
 	    	}
 	    	
 	    	File[] contents = copyFromDir.listFiles();
+	    	//added comment
 	    	for (File file : contents) {
 		         if (file.isFile() && (file.getName().toLowerCase().endsWith("jpg") || file.getName().toLowerCase().endsWith("tif"))) {
 		        	 try {
