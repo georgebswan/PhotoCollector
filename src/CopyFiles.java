@@ -84,7 +84,7 @@ public class CopyFiles extends Thread {
 	    	File toFile;
 	    	int copyCount = 0;
 	    	for (File file : contents) {
-		         if (file.isFile() && file.getName().toLowerCase().endsWith("jpg")) {
+		         if (file.isFile() && (file.getName().toLowerCase().endsWith("jpg") || file.getName().toLowerCase().endsWith("tif"))) {
 		             //are we keeping the original name for toFile, or creating a new one?
 		        	 if(rename == true) {
 		        		 //here if renaming it. first create the name of the destination file
@@ -151,7 +151,7 @@ public class CopyFiles extends Thread {
 	    	
 	    	File[] contents = copyFromDir.listFiles();
 	    	for (File file : contents) {
-		         if (file.isFile() && file.getName().toLowerCase().endsWith("jpg")) {
+		         if (file.isFile() && (file.getName().toLowerCase().endsWith("jpg") || file.getName().toLowerCase().endsWith("jpg"))) {
 		        	 try {
 		        		  out.write(subFolder + "," + file.getName());
 		        		  out.newLine();
