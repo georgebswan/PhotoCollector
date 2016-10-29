@@ -151,7 +151,7 @@ public class CopyFiles extends Thread {
 	    	
 	    	File[] contents = copyFromDir.listFiles();
 	    	for (File file : contents) {
-		         if (file.isFile() && (file.getName().toLowerCase().endsWith("jpg") || file.getName().toLowerCase().endsWith("jpg"))) {
+		         if (file.isFile() && (file.getName().toLowerCase().endsWith("jpg") || file.getName().toLowerCase().endsWith("tif"))) {
 		        	 try {
 		        		  out.write(subFolder + "," + file.getName());
 		        		  out.newLine();
