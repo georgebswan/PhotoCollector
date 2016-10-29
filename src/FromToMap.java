@@ -34,7 +34,7 @@ public class FromToMap {
 	public int countPhotosInDirectory(File directory) {
 	      int count = 0;
 	      for (File file : directory.listFiles( )) {
-	          if (file.isFile() && file.getName().toLowerCase().endsWith("jpg")) {
+	          if (file.isFile() && (file.getName().toLowerCase().endsWith("jpg") || file.getName().toLowerCase().endsWith("tif"))) {
 	              count++;
 	          }
 	          if (file.isDirectory()) {
