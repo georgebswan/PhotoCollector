@@ -145,6 +145,7 @@ public class CopyFiles extends Thread {
 	    	
 	    	//create a mappings file to hold the dir, file mappings
 	    	dirPhotoMappings = new MappingList();
+
 	    	
 	    	//copy the content from OriginalScans into EnhancedScans
 	    	copyPhotos(new File(srcFolderName), outputFolder, false, true);
