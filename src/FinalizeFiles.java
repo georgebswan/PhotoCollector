@@ -10,25 +10,26 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 
+import aberscan.MappingList;
+import aberscan.MappingList.Map;
+
 
 public class FinalizeFiles extends Thread {
 	final String outputFolderName = "EnhancedScans";
-	final String finalFolderName = "FinalScans";
+	final String outputFragmentedFolderName = "EnhancedScansFragmented";
+	final String finalFolderName = "Aberscan Imaging";
 	final String editedFolderName = "toBeEdited";
 	File destDir;
 	MapLogPane logPane;
 	final String mappingsFileName = "AberscanPhotoMappings.txt";
-	ArrayList<Map> finalMappings;
-	int photoCount;
+	MappingList dirPhotoMappings;
 	
 	
 	public FinalizeFiles(String str, File destDir, MapLogPane logPane) {
 		super(str);
 		this.destDir = destDir;
 		this.logPane = logPane;
-		finalMappings = new ArrayList<Map>();
-		photoCount = 0;
-	    
+		dirPhotoMappings = new MappingList();   
 	}
 	
 	 public void run() {
@@ -37,16 +38,38 @@ public class FinalizeFiles extends Thread {
 		File fromFile;
 			
     	File outputFolder = new File(destDir.getAbsolutePath() + "\\" + outputFolderName);
+    	File outputFragmentedFolder = new File(destDir.getAbsolutePath() + "\\" + outputFragmentedFolderName);
     	File finalFolder = new File(destDir.getAbsolutePath() + "\\" + finalFolderName);
-    	File editedFolder = new File(destDir.getAbsolutePath() + "\\" + outputFolderName + "\\" + editedFolderName);
+    	File tmpOutputFolder = null;
     	
     	logPane.println("\nCreating the Final Folder '" + finalFolder.getAbsolutePath() + "'");
+    	
+    	//first, we need to know if we are copying from the FragmentedOutputFolder or a regular OutputFolder
+    	if(outputFragmentedFolder.exists()) {
+    		tmpOutputFolder = outputFragmentedFolder;
+    		
+    		//Note that the enhanced Folder is out of date, since recent changes are all in the fragmented folder
+        	File invalidOutputFolder = new File(outputFolder + "OutOfDate");
+    		try {
+				FileUtils.moveDirectory(outputFolder, invalidOutputFolder);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+   				JOptionPane.showMessageDialog(null, "ERROR: Move of folder '" + outputFolder.getAbsolutePath() + "' to '" + invalidOutputFolder.getAbsolutePath() + "' failed");
+			}
+    	}
+    	else {
+    		tmpOutputFolder = outputFolder;
+    	}
 		
-    	//first, open up the mappings file in the EnhancedScans folder and read out the info there
-    	finalMappings = readMappingsFile();
+    	//first, open up the mappings file in the EnhancedScans folder or EnhancedFragmentedScans and read out the info there
+		//read the current mappings out of the mapping file in copyFromDir
+		dirPhotoMappings.loadMappingsFromFile(tmpOutputFolder);
     	
     	//now do the copy
-    	for (Map map : finalMappings){
+		int numMaps = dirPhotoMappings.getNumMaps();
+    	for (int i = 0; i < numMaps; i++){
+			Map map = dirPhotoMappings.getMap(i);
     		String subFolderName = map.getFolderName();
     		String fileName = map.getFileName();
     		//System.out.println("subFolderName = '" + subFolderName + "', fileName = '" + fileName + "'");
@@ -61,17 +84,19 @@ public class FinalizeFiles extends Thread {
 	   				prevSubFolderName = subFolderName;
 	   			} catch (IOException e1) {
 	   				e1.printStackTrace();
+	   				JOptionPane.showMessageDialog(null, "ERROR: Creation of a Final Folder '" + toDir.getAbsolutePath() + "' failed");
 	   			}
    		 	}
     		
    		 	//copy the file
     		//first see if the photo is in the enhancedScans/toBeEdited folder instead of EnhancedScans
+   	    	File editedFolder = new File(tmpOutputFolder.getAbsolutePath() + "\\" + editedFolderName);
     		fromFile = new File(editedFolder.getAbsolutePath() + "\\" + fileName);
     		if(fromFile.exists() == true) {
     			copyFile(toDir, fromFile);
     		}
     		else {
-        		fromFile = new File(outputFolder.getAbsolutePath() + "\\" + fileName);
+        		fromFile = new File(tmpOutputFolder.getAbsolutePath() + "\\" + fileName);
     			copyFile(toDir, fromFile);
     		}
          }
@@ -86,52 +111,7 @@ public class FinalizeFiles extends Thread {
        		  FileUtils.copyFileToDirectory(fromFile, toDir);
        	  } catch (IOException e) {
  				e.printStackTrace();
+   				JOptionPane.showMessageDialog(null, "ERROR: Copy of File '" + fromFile.getAbsolutePath() + "' to folder '" + toDir.getAbsolutePath() + "' failed");
 		  }
 	 }
-	 
-	 private ArrayList<Map> readMappingsFile() {
-		 ArrayList<Map> maps = new ArrayList<Map>();
-
-		 try{
-			  FileInputStream fstream = new FileInputStream(destDir.getAbsolutePath() + "\\" + outputFolderName + "\\" + mappingsFileName);
-			  // Get the object of DataInputStream
-			  DataInputStream in = new DataInputStream(fstream);
-			  BufferedReader br = new BufferedReader(new InputStreamReader(in));
-			  String strLine;
-			  //Read File Line By Line
-			  while ((strLine = br.readLine()) != null)   {
-				  String[] splits = strLine.split(",");
-				  maps.add(new Map(splits[0], splits[1]));
-				  
-				  // Print the content on the console
-				  //System.out.println ("folderName = ;" + splits[0] + "', fileName = '" + splits[1] + "'");
-			  }
-			  //Close the input stream
-			  in.close();
-		}
-		catch (Exception e) {//Catch exception if any
-			  System.err.println("Error: Couldn't open the mappings file " + e.getMessage());
-		}
-		
-		return (maps);
-	 }
-	 
-	 private class Map {
-		String folderName;
-		String fileName;
-		
-		public String getFolderName() { return (folderName); }
-		public String getFileName() { return (fileName); }
-		
-		public Map(String folderName, String fileName) {
-			this.folderName = folderName;
-			this.fileName = fileName;
-		}
-		
-		//public void print() {
-		//	System.out.println("-------------------------------------------------------");
-		//	System.out.println("folderName = " + folderName);
-		//	System.out.println("fileName = " + fileName);
-		//}
-	}
 }
