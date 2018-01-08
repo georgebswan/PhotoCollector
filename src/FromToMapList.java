@@ -1,15 +1,15 @@
-
 import java.io.*;
 import java.util.ArrayList;
 
 import javax.swing.*;
  
-public class MapList {
+public class FromToMapList {
     ArrayList <FromToMap> mappings;
+	final String mappingsFileName = "AberscanPhotoMappings.txt";
     
     public ArrayList<FromToMap> getMappings() { return mappings; }
  
-    public MapList() {
+    public FromToMapList() {
     	mappings = new ArrayList<FromToMap>();
     }
     
@@ -78,7 +78,7 @@ public class MapList {
     	
     	return(tmpMaps);
     }
-    
+	 
     public int log(JTextArea log) {
         int totalPhotoCount = 0;
         for (FromToMap map : mappings){
@@ -95,3 +95,4 @@ public class MapList {
     	System.out.println("===========" + word + "=========end");
     }
 }
+

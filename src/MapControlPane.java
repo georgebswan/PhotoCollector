@@ -26,12 +26,12 @@ public class MapControlPane extends JPanel{
 	static final long serialVersionUID = 2;
     static private final String fromRootDir = "C:\\Scanned_Pictures";
 	static private final String destRootDir = "C:\\AberscanInProgress";
-    JButton copyButton, toSelectButton, fromSelectButton, resetButton, finalizeButton;
+    JButton copyButton, toSelectButton, fromSelectButton, resetButton, finalizeButton, fragmentButton;
     JComboBox<String> imageTypeList;
     JTable table;
     JTextArea log;
     JFileChooser fromChooser, destChooser;
-    MapList mapList;
+    FromToMapList mapList;
     File[] fromDirs;
     File destDir;
     String toDirName;
@@ -40,6 +40,7 @@ public class MapControlPane extends JPanel{
     String startText = "";
     JCheckBox matchCheck;
     boolean matchCheckStatus = false;
+    //boolean fragmentCheckStatus = false;
     MapTablePane tablePane;
     MapLogPane logPane;
     String imageType = "photo";
@@ -49,7 +50,7 @@ public class MapControlPane extends JPanel{
  
     public MapControlPane(MapTablePane tPane, MapLogPane lPane) {
         super(new BorderLayout());
-        mapList = new MapList();
+        mapList = new FromToMapList();
         tablePane = tPane;
         logPane = lPane;
 
@@ -132,7 +133,6 @@ public class MapControlPane extends JPanel{
 				            toSelectButton.setEnabled(true);
 				            imageTypeList.setEnabled(true);
 				            startField.setEnabled(true);
-				          
 				        	
 			            } 
 			            else {
@@ -189,9 +189,25 @@ public class MapControlPane extends JPanel{
 		            	//JOptionPane.showMessageDialog(null, "Photos are now copied");
             			copyThread = new CopyFiles("Copy Files", mapList, destDir, logPane, imageType, startNumber);
                 		copyThread.start();
-                		
 		            	copyButton.setEnabled(false);
 		            	finalizeButton.setEnabled(true);
+		            	fragmentButton.setEnabled(true);
+            		}
+            	}
+            );
+        
+        //Create the fragment button. Set it to disabled to start
+    	ImageIcon fragmentIcon = new ImageIcon("images/fragmentPhotos.jpg");
+        fragmentButton = new JButton(fragmentIcon);
+        fragmentButton.setEnabled(false);
+        fragmentButton.addActionListener(
+            	new ActionListener() {
+            		public void actionPerformed(ActionEvent e) {
+            			Thread fragmentThread;
+            			fragmentThread = new FragmentFiles("Fragment Files", destDir, logPane);
+                		fragmentThread.start();
+                		
+		            	fragmentButton.setEnabled(false);
             		}
             	}
             );
@@ -238,6 +254,7 @@ public class MapControlPane extends JPanel{
     	        }
     	    }
     	);
+        
 		
         //pull down box for image type selection
         String[] imageTypes = {"photo", "slide", "negative"};
@@ -269,7 +286,7 @@ public class MapControlPane extends JPanel{
         			if(e.getSource() == startField) {
         				startText = startField.getText();
         				startNumber = Integer.parseInt(startText);
-        				System.out.println("Start Number = " + startText);
+        				//System.out.println("Start Number = " + startText);
         			}
         		}
   
@@ -307,7 +324,12 @@ public class MapControlPane extends JPanel{
         toBar.add(toSelectButton);
         toBar.add(Box.createRigidArea(new Dimension(fillerWidth,0)));
         toBar.add(copyButton);
-        toBar.add(Box.createRigidArea(new Dimension(fillerWidth*edgeSpacer,0)));
+        toBar.add(Box.createRigidArea(new Dimension(fillerWidth,0)));
+        toBar.add(fragmentButton);
+        //toBar.add(Box.createRigidArea(new Dimension(fillerWidth,0)));
+        //toBar.add(Box.createRigidArea(new Dimension(fillerWidth*edgeSpacer/2,0)));
+
+        
 		add(toBar, BorderLayout.LINE_START);
 		
 		JToolBar finalizeBar = new JToolBar();
